@@ -72,8 +72,28 @@ class Mubi(object):
         # </li>
         #<ol>
         page = self._session.get(self._mubi_urls["nowshowing"])
-        items = [x for x in BS(page.content).findAll("li", {"class": re.compile('film-tile film-media item -item-*')})]
         films = []
+        fotd = [x for x in BS(page.content).findAll("a", {"class": re.compile('  m-icon-play m-play-button play')})]
+        mubi_id = x.get("data-filmid")
+        title = x.get("href")
+        artwork = ''
+        director_year = ''
+        director = ''
+        year = ''
+        listview_title = u'{0} (FOTD)'.format(title)
+        metadata = Metadata(
+            director=director,
+            year=year,
+            duration=None,
+            country=None,
+            plotoutline='Synopsis (not yet implemented)',
+            plot=""
+        )
+
+        f = Film(listview_title, mubi_id, artwork, metadata)
+        films.append(f)
+
+        items = [x for x in BS(page.content).findAll("li", {"class": re.compile('film-tile film-media item -item-*')})]
         for x in items:
 
             # core 
