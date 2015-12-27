@@ -17,7 +17,8 @@ class Mubi(object):
     _USER_AGENT       = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_6_8) AppleWebKit/537.13+ (KHTML, like Gecko) Version/5.1.7 Safari/534.57.2"
     _regexps = { "watch_page":  re.compile(r"^.*/watch$"),
                  "director_year":  re.compile(r"^(.+), (\d+)$"),
-                 "director_year_ns":  re.compile(r"^(.+)(\d{4})$")
+                 "director_year_ns":  re.compile(r"^(.+)(\d{4})$"),
+                 "artwork":  re.compile(r".*background-image:url\(([^)]+)\).*")
                }
     _mubi_urls = {
                   "login":      urljoin(_URL_MUBI_SECURE, "login"),
@@ -58,9 +59,10 @@ class Mubi(object):
 
     def get_fotd(self, page):
         fotd = BS(page.content).find("section", {"class": re.compile('film-of-the-day')})
-        mubi_id = fotd.find('a', {"class": "  m-icon-play m-play-button play"}).get("data-filmid")
-        title   = fotd.find('div', {"class": "body"}).find('a', {"class": "link"}).text
-        artwork = ''
+        mubi_id       = fotd.find('a', {"class": "  m-icon-play m-play-button play"}).get("data-filmid")
+        title         = fotd.find('div', {"class": "body"}).find('a', {"class": "link"}).text
+        artwork_style = fotd.find('div', {"class": "still visible-sm m-full-background"}).get("style")
+        artwork       = self._regexps["artwork"].match(artwork_style).group(1)
         director_year = fotd.find("h2", {"class": "director-year condensed-upper"})
         director      = director_year.find("span").text
         #No separator so this gets the last four digits
